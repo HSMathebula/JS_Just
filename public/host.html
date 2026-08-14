@@ -223,9 +223,12 @@ socket.on('roomCreated', (data) => {
   const keepOpen = data.p2p
     ? '<br><span style="opacity:0.8">Keep this tab open — the room is hosted here</span>'
     : '';
+  const netHint = data.p2p
+    ? 'Any Wi‑Fi or mobile data — players do not need to be on the same network'
+    : 'Same Wi‑Fi as this computer';
   document.getElementById('joinUrl').innerHTML =
     'Players join at <strong>' + playerPage.href + '</strong><br>' +
-    '<span style="opacity:0.8">Same Wi‑Fi · iOS motion needs HTTPS (or use Tap to move)</span>' +
+    '<span style="opacity:0.8">' + netHint + ' · iOS motion needs HTTPS (or use Tap to move)</span>' +
     keepOpen;
   saveHostSession({ code: data.code, hostToken: data.hostToken });
   if (data.targetScore) {
@@ -332,6 +335,15 @@ function setTempoUI(tempo, mode) {
   }
 }
 
+function showLobbyUI() {
+  countdownDisplay.style.display = 'none';
+  winnerDisplay.style.display = 'none';
+  matchDisplay.style.display = 'none';
+  musicPanel.style.display = 'none';
+  visualizer.style.display = 'none';
+  playersEl.style.display = 'flex';
+}
+
 function render(state) {
   lastState = state;
   roundBadge.textContent = 'Round ' + (state.roundNumber || 0);
@@ -388,11 +400,7 @@ function render(state) {
   tempoModeSelect.disabled = busy;
 
   if (state.gameState === 'lobby') {
-    countdownDisplay.style.display = 'none';
-    winnerDisplay.style.display = 'none';
-    matchDisplay.style.display = 'none';
-    musicPanel.style.display = 'none';
-    playersEl.style.display = 'flex';
+    showLobbyUI();
   } else if (state.gameState === 'countdown') {
     winnerDisplay.style.display = 'none';
     matchDisplay.style.display = 'none';
@@ -425,7 +433,22 @@ function render(state) {
 
 socket.on('state', render);
 
+socket.on('backToLobby', () => {
+  stopMusic();
+  if (lastState) {
+    lastState.gameState = 'lobby';
+    lastState.matchWinner = null;
+    if (Array.isArray(lastState.players)) {
+      lastState.players = lastState.players.map((p) => Object.assign({}, p, { alive: true }));
+    }
+    render(lastState);
+  } else {
+    showLobbyUI();
+  }
+});
+
 socket.on('countdown', (n) => {
+  if (lastState && lastState.gameState === 'lobby') return;
   playersEl.style.display = 'none';
   countdownDisplay.style.display = 'block';
   countdownDisplay.textContent = n;
@@ -434,12 +457,14 @@ socket.on('countdown', (n) => {
 });
 
 socket.on('go', () => {
+  if (lastState && lastState.gameState === 'lobby') return;
   countdownDisplay.style.display = 'none';
   playersEl.style.display = 'flex';
 });
 
 socket.on('musicCommand', (cmd) => {
   if (cmd.action === 'play') {
+    if (lastState && lastState.gameState === 'lobby') return;
     startMusic(cmd.tempoMode);
   } else if (cmd.action === 'stop') {
     stopMusic();
@@ -454,6 +479,7 @@ socket.on('tempoUpdate', (data) => {
 });
 
 socket.on('roundOver', (data) => {
+  if (lastState && lastState.gameState === 'lobby') return;
   winnerDisplay.style.display = 'block';
   musicPanel.style.display = 'none';
   winnerName.textContent = data.winner ? data.winner.name + ' 🏆' : 'No winner';
@@ -461,6 +487,7 @@ socket.on('roundOver', (data) => {
 });
 
 socket.on('matchOver', (data) => {
+  if (lastState && lastState.gameState === 'lobby') return;
   matchDisplay.style.display = 'block';
   winnerDisplay.style.display = 'none';
   matchName.textContent = data.winner ? data.winner.name + ' 👑' : 'No champion';
@@ -504,6 +531,16 @@ startBtn.addEventListener('click', (e) => {
 resetBtn.addEventListener('click', (e) => {
   e.preventDefault();
   stopMusic();
+  if (lastState) {
+    lastState.gameState = 'lobby';
+    lastState.matchWinner = null;
+    if (Array.isArray(lastState.players)) {
+      lastState.players = lastState.players.map((p) => Object.assign({}, p, { alive: true }));
+    }
+    render(lastState);
+  } else {
+    showLobbyUI();
+  }
   socket.emit('resetLobby');
 });
 

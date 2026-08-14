@@ -8,6 +8,49 @@
   const DEFAULT_TARGET_SCORE = 3;
   const PLAYER_GRACE_MS = 20000;
   const PEER_PREFIX = 'juost';
+  const PEER_CONNECT_MS = 25000;
+  const ICE_SERVERS = [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'stun:stun.cloudflare.com:3478' },
+    {
+      urls: [
+        'turn:eu-0.turn.peerjs.com:3478',
+        'turn:us-0.turn.peerjs.com:3478'
+      ],
+      username: 'peerjs',
+      credential: 'peerjsp'
+    },
+    {
+      urls: [
+        'turn:openrelay.metered.ca:80',
+        'turn:openrelay.metered.ca:443',
+        'turn:openrelay.metered.ca:443?transport=tcp',
+        'turns:openrelay.metered.ca:443?transport=tcp'
+      ],
+      username: 'openrelayproject',
+      credential: 'openrelayproject'
+    }
+  ];
+
+  function peerOptions() {
+    return {
+      host: '0.peerjs.com',
+      port: 443,
+      path: '/',
+      secure: true,
+      pingInterval: 5000,
+      config: {
+        iceServers: ICE_SERVERS,
+        sdpSemantics: 'unified-plan'
+      }
+    };
+  }
+
+  function createPeer(id) {
+    return id ? new Peer(id, peerOptions()) : new Peer(peerOptions());
+  }
 
   function newToken() {
     const a = new Uint8Array(16);
@@ -239,18 +282,25 @@
       room.matchWinner = null;
       this.broadcastState();
       let count = 3;
+      const countdownGen = (room.countdownGen = (room.countdownGen || 0) + 1);
       this.send('countdown', count, null);
       const self = this;
       room.countdownTimer = setInterval(() => {
+        if (room.gameState !== 'countdown' || room.countdownGen !== countdownGen) {
+          clearInterval(room.countdownTimer);
+          room.countdownTimer = null;
+          return;
+        }
         count--;
         if (count > 0) {
           self.send('countdown', count, null);
         } else {
           clearInterval(room.countdownTimer);
           room.countdownTimer = null;
+          if (room.gameState !== 'countdown' || room.countdownGen !== countdownGen) return;
           room.gameState = 'playing';
           self.broadcastState();
-          self.send('go', null, null);
+          self.send('go', {}, null);
           if (room.tempoMode === 'steady') {
             self.send('musicCommand', { action: 'stop' }, null);
             self.send('tempoUpdate', { tempo: room.tempo, sensitivity: room.sensitivity }, null);
@@ -272,6 +322,7 @@
       }, 1000);
     } else if (ev === 'resetLobby') {
       room.gameState = 'lobby';
+      room.countdownGen = (room.countdownGen || 0) + 1;
       room.matchWinner = null;
       Object.values(room.playersByToken).forEach((p) => { p.alive = true; });
       clearInterval(room.sensitivityTimer);
@@ -279,12 +330,13 @@
       room.sensitivityTimer = null;
       room.countdownTimer = null;
       this.send('musicCommand', { action: 'stop' }, null);
-      this.send('backToLobby', null, null);
+      this.send('backToLobby', {}, null);
       this.broadcastState();
     } else if (ev === 'newMatch') {
       const score = parseInt(data && data.targetScore, 10);
       if (score >= 1 && score <= 20) room.targetScore = score;
       room.gameState = 'lobby';
+      room.countdownGen = (room.countdownGen || 0) + 1;
       room.roundNumber = 0;
       room.matchWinner = null;
       Object.values(room.playersByToken).forEach((p) => { p.alive = true; p.score = 0; });
@@ -293,7 +345,7 @@
       room.sensitivityTimer = null;
       room.countdownTimer = null;
       this.send('musicCommand', { action: 'stop' }, null);
-      this.send('backToLobby', null, null);
+      this.send('backToLobby', {}, null);
       this.broadcastState();
     } else if (ev === 'setTargetScore') {
       if (room.gameState !== 'lobby' && room.gameState !== 'matchover') return;
@@ -485,7 +537,7 @@
       if (creating) return;
       creating = true;
       const id = peerIdFor(code);
-      peer = new Peer(id);
+      peer = createPeer(id);
       const failTimer = setTimeout(() => {
         sock._in('connect_error', { message: 'Could not create a room. Reload and try again.' });
       }, 12000);
@@ -558,7 +610,7 @@
     function ensurePeer() {
       return new Promise((resolve, reject) => {
         if (peer && peer.id) return resolve(peer);
-        peer = new Peer();
+        peer = createPeer();
         const t = setTimeout(() => reject(new Error('timeout')), 12000);
         peer.on('open', (id) => {
           clearTimeout(t);
@@ -573,6 +625,22 @@
       });
     }
 
+    function waitForConnOpen(connection, ms) {
+      return new Promise((resolve, reject) => {
+        if (connection.open) return resolve();
+        let done = false;
+        const finish = (fn, arg) => {
+          if (done) return;
+          done = true;
+          clearTimeout(t);
+          fn(arg);
+        };
+        const t = setTimeout(() => finish(reject, new Error('timeout')), ms);
+        connection.on('open', () => finish(resolve));
+        connection.on('error', (err) => finish(reject, err));
+      });
+    }
+
     async function connectToHost(ev, data) {
       const code = (data && data.code || '').toUpperCase();
       try {
@@ -581,32 +649,38 @@
         sock._in('joinError', { message: 'Could not reach the room service. Check your network.' });
         return;
       }
-      if (conn) {
-        try { conn.close(); } catch (e) {}
-        conn = null;
-      }
-      conn = peer.connect(peerIdFor(code), { reliable: true });
-      const t = setTimeout(() => {
-        sock._in('joinError', { message: 'Room not found. Check the code and that the host tab is still open.' });
-      }, 8000);
-      conn.on('open', () => {
-        clearTimeout(t);
-        conn.send({ e: ev, d: data });
-        pending.forEach((item) => conn.send({ e: item[0], d: item[1] }));
-        pending.length = 0;
-      });
-      conn.on('data', (msg) => {
-        if (msg && msg.e) sock._in(msg.e, msg.d);
-      });
-      conn.on('close', () => {
-        sock.connected = false;
-        sock._in('disconnect');
-      });
-      peer.on('error', (err) => {
-        clearTimeout(t);
-        if (err && err.type === 'peer-unavailable') {
-          sock._in('joinError', { message: 'Room not found. Check the code and that the host tab is still open.' });
+
+      const hostId = peerIdFor(code);
+      let lastErr = null;
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        if (conn) {
+          try { conn.close(); } catch (e) {}
+          conn = null;
         }
+        conn = peer.connect(hostId, { reliable: true });
+        try {
+          await waitForConnOpen(conn, PEER_CONNECT_MS);
+          conn.send({ e: ev, d: data });
+          pending.forEach((item) => conn.send({ e: item[0], d: item[1] }));
+          pending.length = 0;
+          conn.on('data', (msg) => {
+            if (msg && msg.e) sock._in(msg.e, msg.d);
+          });
+          conn.on('close', () => {
+            sock.connected = false;
+            sock._in('disconnect');
+          });
+          return;
+        } catch (err) {
+          lastErr = err;
+        }
+      }
+
+      const unavailable = lastErr && lastErr.type === 'peer-unavailable';
+      sock._in('joinError', {
+        message: unavailable
+          ? 'Room not found. Check the code and that the host tab is still open.'
+          : 'Could not reach the host. Check the code, keep the host tab open, and try again.'
       });
     }
 

@@ -157,6 +157,7 @@ let motionAvailable = false;
 let sensitivity = 0.5;
 let tempo = 1.0;
 let inRoom = false;
+let lastGameState = null;
 
 const BASE_THRESHOLD = 24;
 
@@ -347,6 +348,7 @@ joinBtn.addEventListener('click', (e) => {
 
 function enterLobby(data) {
   inRoom = true;
+  lastGameState = data.gameState || 'lobby';
   myColor = data.color;
   myToken = data.token;
   myRoomCode = data.roomCode;
@@ -378,18 +380,32 @@ socket.on('joinError', (data) => {
   errorMsg.textContent = data.message;
 });
 
+function goToLobby() {
+  lastGameState = 'lobby';
+  alive = true;
+  stopMotionWatch();
+  stopMusic();
+  tapOutBtn.style.display = 'none';
+  app.style.backgroundColor = '#0b0b12';
+  showScreen('lobbyScreen');
+}
+
 socket.on('state', (state) => {
   if (!inRoom) return;
+  lastGameState = state.gameState;
   roundInfo.textContent = 'Round ' + (state.roundNumber || 0) + ' · first to ' + (state.targetScore || 3);
+  if (state.gameState === 'lobby') goToLobby();
 });
 
 socket.on('countdown', (n) => {
+  if (!inRoom || lastGameState === 'lobby') return;
   stopMusic();
   showScreen('countdownScreen');
   countdownScreen.textContent = n;
 });
 
 socket.on('go', () => {
+  if (!inRoom || lastGameState === 'lobby') return;
   alive = true;
   sensitivity = 0.5;
   tempo = 1.0;
@@ -407,8 +423,10 @@ socket.on('go', () => {
 });
 
 socket.on('musicCommand', (cmd) => {
-  if (cmd.action === 'play') startMusic(cmd.tempoMode);
-  else if (cmd.action === 'stop') stopMusic();
+  if (cmd.action === 'play') {
+    if (lastGameState === 'lobby') return;
+    startMusic(cmd.tempoMode);
+  } else if (cmd.action === 'stop') stopMusic();
 });
 
 socket.on('tempoUpdate', (data) => {
@@ -446,14 +464,13 @@ function markOut(reason) {
 }
 
 socket.on('backToLobby', () => {
-  alive = true;
-  stopMotionWatch();
-  stopMusic();
-  app.style.backgroundColor = '#0b0b12';
-  showScreen('lobbyScreen');
+  if (!inRoom) return;
+  goToLobby();
 });
 
 socket.on('roundOver', (data) => {
+  if (lastGameState === 'lobby') return;
+  lastGameState = 'roundover';
   stopMotionWatch();
   stopMusic();
   tapOutBtn.style.display = 'none';
@@ -482,6 +499,8 @@ socket.on('roundOver', (data) => {
 });
 
 socket.on('matchOver', (data) => {
+  if (lastGameState === 'lobby') return;
+  lastGameState = 'matchover';
   stopMotionWatch();
   stopMusic();
   tapOutBtn.style.display = 'none';

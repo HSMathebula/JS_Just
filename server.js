@@ -421,13 +421,20 @@ io.on('connection', (socket) => {
     let count = 3;
     io.to(room.code).emit('countdown', count);
 
+    const countdownGen = (room.countdownGen = (room.countdownGen || 0) + 1);
     room.countdownTimer = setInterval(() => {
+      if (room.gameState !== 'countdown' || room.countdownGen !== countdownGen) {
+        clearInterval(room.countdownTimer);
+        room.countdownTimer = null;
+        return;
+      }
       count--;
       if (count > 0) {
         io.to(room.code).emit('countdown', count);
       } else {
         clearInterval(room.countdownTimer);
         room.countdownTimer = null;
+        if (room.gameState !== 'countdown' || room.countdownGen !== countdownGen) return;
         room.gameState = 'playing';
         broadcastRoomState(room);
         io.to(room.code).emit('go');
@@ -484,6 +491,7 @@ io.on('connection', (socket) => {
     const room = getRoomBySocket(socket.id);
     if (!room || room.hostId !== socket.id) return;
     room.gameState = 'lobby';
+    room.countdownGen = (room.countdownGen || 0) + 1;
     room.matchWinner = null;
     Object.values(room.playersByToken).forEach(p => { p.alive = true; });
     clearInterval(room.sensitivityTimer);
@@ -502,6 +510,7 @@ io.on('connection', (socket) => {
     const score = parseInt(targetScore, 10);
     if (score >= 1 && score <= 20) room.targetScore = score;
     room.gameState = 'lobby';
+    room.countdownGen = (room.countdownGen || 0) + 1;
     room.roundNumber = 0;
     room.matchWinner = null;
     Object.values(room.playersByToken).forEach(p => {

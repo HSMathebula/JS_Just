@@ -16,29 +16,44 @@
     padding: 40px 24px;
   }
   h1.logo { font-size: 5vw; font-weight: 900; letter-spacing: -0.03em; margin: 0; }
+  .meta-row {
+    display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center;
+    justify-content: center; margin-top: 12px;
+  }
   .room-code {
     font-size: 4vw; font-weight: 900; font-family: monospace;
     background: #1a1a24; border: 3px solid var(--accent); border-radius: 16px;
-    padding: 12px 32px; margin-top: 16px; letter-spacing: 0.3em;
+    padding: 12px 32px; letter-spacing: 0.3em;
   }
-  .join-url { font-size: 1.4vw; opacity: 0.5; margin-top: 10px; margin-bottom: 30px; }
+  .round-badge, .score-badge {
+    font-size: 1.3vw; opacity: 0.7; font-family: monospace;
+    background: #1a1a24; border-radius: 10px; padding: 8px 14px;
+  }
+  .join-url { font-size: 1.3vw; opacity: 0.5; margin-top: 10px; margin-bottom: 24px; text-align: center; line-height: 1.4; }
 
   #players {
     display: flex; flex-wrap: wrap; gap: 16px; justify-content: center;
     max-width: 1100px; margin-bottom: 40px;
   }
   .player-chip {
-    padding: 14px 24px; border-radius: 14px; font-size: 1.8vw; font-weight: 700;
+    padding: 14px 24px 14px 20px; border-radius: 14px; font-size: 1.8vw; font-weight: 700;
     background: #1a1a24; border: 3px solid transparent; transition: all 0.25s ease;
-    position: relative;
+    position: relative; display: flex; align-items: center; gap: 10px;
   }
-  .player-chip .score { font-size: 1.2vw; opacity: 0.6; margin-left: 8px; }
+  .player-chip .score { font-size: 1.2vw; opacity: 0.6; }
   .player-chip.out { opacity: 0.25; text-decoration: line-through; transform: scale(0.92); }
+  .player-chip.away { opacity: 0.45; border-style: dashed; }
   .player-chip.out::after {
     content: '☠'; position: absolute; top: -8px; right: -8px; font-size: 1.4vw;
   }
+  .kick-btn {
+    font-size: 0.9vw; padding: 4px 10px; border-radius: 999px;
+    border: 1px solid #444; background: #2a2a36; color: #aaa; cursor: pointer;
+    font-weight: 600;
+  }
+  .kick-btn:hover { background: #ff5252; color: #fff; border-color: #ff5252; }
 
-  #controls { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
+  #controls { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 10px; align-items: center; }
   button {
     font-size: 1.5vw; font-weight: 700; padding: 16px 36px;
     border-radius: 999px; border: none; background: var(--accent); color: #05060a; cursor: pointer;
@@ -48,24 +63,30 @@
   button.secondary { background: #2a2a36; color: var(--fg); }
   button:disabled { opacity: 0.3; cursor: default; }
 
-  select {
-    font-size: 1.4vw; padding: 12px 20px; border-radius: 12px;
+  select, .target-wrap {
+    font-size: 1.4vw; padding: 12px 16px; border-radius: 12px;
     border: 2px solid #333; background: #1a1a24; color: var(--fg); cursor: pointer;
   }
-
-  #countdownDisplay {
-    font-size: 20vw; font-weight: 900; display: none;
+  .target-wrap { display: flex; align-items: center; gap: 8px; cursor: default; }
+  .target-wrap label { opacity: 0.6; font-size: 1.1vw; white-space: nowrap; }
+  .target-wrap input {
+    width: 3.5em; font-size: 1.4vw; padding: 4px 8px; border-radius: 8px;
+    border: 1px solid #444; background: #0b0b12; color: var(--fg); text-align: center;
   }
-  #winnerDisplay { display: none; text-align: center; }
-  #winnerDisplay .label { font-size: 2vw; opacity: 0.6; }
-  #winnerDisplay .name { font-size: 7vw; font-weight: 900; }
+
+  #countdownDisplay { font-size: 20vw; font-weight: 900; display: none; }
+  #winnerDisplay, #matchDisplay { display: none; text-align: center; }
+  #winnerDisplay .label, #matchDisplay .label { font-size: 2vw; opacity: 0.6; }
+  #winnerDisplay .name, #matchDisplay .name { font-size: 7vw; font-weight: 900; }
+  #matchDisplay .label { color: #ffd740; }
 
   .empty-hint { opacity: 0.4; font-size: 1.5vw; }
-
-  /* Tempo / music bar */
-  #musicPanel {
-    width: 60vw; margin-top: 24px; display: none;
+  #statusBanner {
+    display: none; margin-bottom: 16px; padding: 10px 20px; border-radius: 10px;
+    background: #2a2010; color: #ffd740; font-size: 1.3vw;
   }
+
+  #musicPanel { width: 60vw; margin-top: 24px; display: none; }
   #musicPanel .bar-label { font-size: 1.2vw; opacity: 0.6; margin-bottom: 6px; }
   #tempoBar {
     width: 100%; height: 14px; background: #1a1a24; border-radius: 8px; overflow: hidden;
@@ -78,31 +99,36 @@
   }
   #tempoLabel { font-size: 1.3vw; font-family: monospace; margin-top: 6px; opacity: 0.7; }
 
-  /* Audio visualizer */
-  #visualizer {
-    width: 60vw; height: 60px; margin-top: 16px; display: none;
-  }
+  #visualizer { width: 60vw; height: 60px; margin-top: 16px; display: none; }
   #visualizer canvas { width: 100%; height: 100%; border-radius: 8px; }
-
-  .scoreboard { margin-top: 16px; font-size: 1.2vw; opacity: 0.6; }
 </style>
 </head>
 <body>
   <h1 class="logo">JUOST</h1>
-  <div class="room-code" id="roomCode">----</div>
+  <div class="meta-row">
+    <div class="room-code" id="roomCode">----</div>
+    <div class="round-badge" id="roundBadge">Round 0</div>
+    <div class="score-badge" id="scoreBadge">First to 3</div>
+  </div>
   <div class="join-url" id="joinUrl">Loading...</div>
+  <div id="statusBanner"></div>
 
   <div id="players"><span class="empty-hint">Waiting for players to join…</span></div>
 
   <div id="countdownDisplay"></div>
 
   <div id="winnerDisplay">
-    <div class="label">WINNER</div>
+    <div class="label">ROUND WINNER</div>
     <div class="name" id="winnerName"></div>
   </div>
 
+  <div id="matchDisplay">
+    <div class="label">MATCH CHAMPION</div>
+    <div class="name" id="matchName"></div>
+  </div>
+
   <div id="musicPanel">
-    <div class="bar-label">♩ Music Tempo — controls movement sensitivity</div>
+    <div class="bar-label" id="musicBarLabel">♩ Music Tempo — controls movement sensitivity</div>
     <div id="tempoBar"><div id="tempoFill"></div></div>
     <div id="tempoLabel">1.0x — slow = strict, fast = lenient</div>
   </div>
@@ -110,48 +136,46 @@
   <div id="visualizer"><canvas id="vizCanvas"></canvas></div>
 
   <div id="controls">
+    <div class="target-wrap">
+      <label for="targetScore">First to</label>
+      <input id="targetScore" type="number" min="1" max="20" value="3">
+    </div>
     <select id="tempoMode">
-      <option value="accelerating">🎵 Accelerating</option>
-      <option value="random">🎲 Random Shifts</option>
-      <option value="steady">⏱ Steady (no music)</option>
+      <option value="accelerating">Accelerating</option>
+      <option value="random">Random Shifts</option>
+      <option value="steady">Steady (no music)</option>
     </select>
     <button id="startBtn" type="button" disabled>Start Round</button>
+    <button id="newMatchBtn" type="button" class="secondary" style="display:none;">New Match</button>
     <button id="resetBtn" type="button" class="secondary">Back to Lobby</button>
   </div>
 
-<!-- Embedded audio tracks (generated via Web Audio API) -->
 <script src="/socket.io/socket.io.js"></script>
 <script>
+const HOST_KEY = 'juost_host';
 const socket = io({ reconnection: true });
 
-// ---- Create room once connected ----
-socket.on('connect', () => {
-  console.log('Host connected, creating room...');
-  socket.emit('createRoom');
-});
-
-socket.on('roomCreated', (data) => {
-  console.log('Room created:', data.code);
-  document.getElementById('roomCode').textContent = data.code;
-  document.getElementById('joinUrl').textContent =
-    'Players join at: ' + location.origin + ' → code: ' + data.code;
-});
-
-// ---- DOM refs ----
 const playersEl = document.getElementById('players');
 const startBtn = document.getElementById('startBtn');
 const resetBtn = document.getElementById('resetBtn');
+const newMatchBtn = document.getElementById('newMatchBtn');
 const tempoModeSelect = document.getElementById('tempoMode');
+const targetScoreInput = document.getElementById('targetScore');
 const countdownDisplay = document.getElementById('countdownDisplay');
 const winnerDisplay = document.getElementById('winnerDisplay');
 const winnerName = document.getElementById('winnerName');
+const matchDisplay = document.getElementById('matchDisplay');
+const matchName = document.getElementById('matchName');
 const musicPanel = document.getElementById('musicPanel');
+const musicBarLabel = document.getElementById('musicBarLabel');
 const tempoFill = document.getElementById('tempoFill');
 const tempoLabel = document.getElementById('tempoLabel');
 const visualizer = document.getElementById('visualizer');
 const vizCanvas = document.getElementById('vizCanvas');
+const statusBanner = document.getElementById('statusBanner');
+const roundBadge = document.getElementById('roundBadge');
+const scoreBadge = document.getElementById('scoreBadge');
 
-// ---- Web Audio for music-driven gameplay ----
 let audioCtx = null;
 let musicOsc = null;
 let musicGain = null;
@@ -159,6 +183,49 @@ let lfo = null;
 let analyser = null;
 let animFrame = null;
 let currentTempo = 1.0;
+let lastState = null;
+let musicEnabled = true;
+
+function loadHostSession() {
+  try { return JSON.parse(sessionStorage.getItem(HOST_KEY) || 'null'); }
+  catch (e) { return null; }
+}
+
+function saveHostSession(data) {
+  sessionStorage.setItem(HOST_KEY, JSON.stringify(data));
+}
+
+function clearHostSession() {
+  sessionStorage.removeItem(HOST_KEY);
+}
+
+socket.on('connect', () => {
+  const session = loadHostSession();
+  if (session && session.hostToken && session.code) {
+    socket.emit('reclaimHost', { hostToken: session.hostToken, code: session.code });
+  } else {
+    socket.emit('createRoom', { targetScore: parseInt(targetScoreInput.value, 10) || 3 });
+  }
+});
+
+socket.on('reclaimFailed', () => {
+  clearHostSession();
+  socket.emit('createRoom', { targetScore: parseInt(targetScoreInput.value, 10) || 3 });
+});
+
+socket.on('roomCreated', (data) => {
+  document.getElementById('roomCode').textContent = data.code;
+  const origin = location.origin;
+  document.getElementById('joinUrl').innerHTML =
+    'Players join at <strong>' + origin + '/play</strong> with code <strong>' + data.code + '</strong><br>' +
+    '<span style="opacity:0.8">Same Wi‑Fi · iOS motion needs HTTPS (or use Tap to move)</span>';
+  saveHostSession({ code: data.code, hostToken: data.hostToken });
+  if (data.targetScore) {
+    targetScoreInput.value = data.targetScore;
+    scoreBadge.textContent = 'First to ' + data.targetScore;
+  }
+  statusBanner.style.display = 'none';
+});
 
 function initAudio() {
   if (audioCtx) return;
@@ -169,10 +236,14 @@ function initAudio() {
 }
 
 function startMusic(tempoMode) {
+  if (tempoMode === 'steady') {
+    stopMusic();
+    return;
+  }
   initAudio();
   stopMusic();
+  musicEnabled = true;
 
-  // Create a rhythmic synth tone that changes with tempo
   musicGain = audioCtx.createGain();
   musicGain.gain.value = 0.15;
   musicGain.connect(analyser);
@@ -183,10 +254,9 @@ function startMusic(tempoMode) {
   musicOsc.connect(musicGain);
   musicOsc.start();
 
-  // LFO for rhythmic pulsing — rate = tempo
   lfo = audioCtx.createOscillator();
   lfo.type = 'square';
-  lfo.frequency.value = currentTempo * 2; // beats per second
+  lfo.frequency.value = currentTempo * 2;
   const lfoGain = audioCtx.createGain();
   lfoGain.gain.value = 0.12;
   lfo.connect(lfoGain);
@@ -199,18 +269,13 @@ function startMusic(tempoMode) {
 
 function updateMusicTempo(tempo) {
   currentTempo = tempo;
-  if (lfo) {
-    lfo.frequency.value = tempo * 2.5;
-  }
-  if (musicOsc) {
-    // Pitch rises with tempo for urgency
-    musicOsc.frequency.value = 180 + tempo * 80;
-  }
+  if (lfo) lfo.frequency.value = tempo * 2.5;
+  if (musicOsc) musicOsc.frequency.value = 180 + tempo * 80;
 }
 
 function stopMusic() {
-  if (musicOsc) { try { musicOsc.stop(); } catch(e){} musicOsc = null; }
-  if (lfo) { try { lfo.stop(); } catch(e){} lfo = null; }
+  if (musicOsc) { try { musicOsc.stop(); } catch (e) {} musicOsc = null; }
+  if (lfo) { try { lfo.stop(); } catch (e) {} lfo = null; }
   musicGain = null;
   if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
   visualizer.style.display = 'none';
@@ -233,44 +298,113 @@ function drawVisualizer() {
     for (let i = 0; i < bufLen; i++) {
       const h = (data[i] / 255) * height;
       const hue = 200 - (currentTempo - 0.5) * 60 + i * 2;
-      ctx.fillStyle = `hsl(${hue}, 80%, 60%)`;
+      ctx.fillStyle = 'hsl(' + hue + ', 80%, 60%)';
       ctx.fillRect(i * barW, height - h, barW - 1, h);
     }
   }
   draw();
 }
 
-// ---- Game state rendering ----
+function setTempoUI(tempo, mode) {
+  const pct = Math.min(100, ((tempo - 0.5) / 1.5) * 100);
+  tempoFill.style.width = pct + '%';
+  if (mode === 'steady') {
+    tempoLabel.textContent = 'Steady — fixed sensitivity';
+    musicBarLabel.textContent = 'Sensitivity (no music)';
+  } else {
+    tempoLabel.textContent = tempo.toFixed(1) + 'x — ' +
+      (tempo < 1.0 ? 'slow = strict' : tempo > 1.5 ? 'fast = lenient' : 'moderate');
+    musicBarLabel.textContent = '♩ Music Tempo — controls movement sensitivity';
+  }
+}
+
 function render(state) {
+  lastState = state;
+  roundBadge.textContent = 'Round ' + (state.roundNumber || 0);
+  scoreBadge.textContent = 'First to ' + (state.targetScore || 3);
+  if (document.activeElement !== targetScoreInput) {
+    targetScoreInput.value = state.targetScore || 3;
+  }
+
   playersEl.innerHTML = '';
   if (state.players.length === 0) {
     playersEl.innerHTML = '<span class="empty-hint">Waiting for players to join…</span>';
   } else {
     state.players.forEach(p => {
       const chip = document.createElement('div');
-      chip.className = 'player-chip' + (p.alive ? '' : ' out');
+      let cls = 'player-chip';
+      if (!p.alive && (state.gameState === 'playing' || state.gameState === 'countdown')) cls += ' out';
+      if (!p.alive && state.gameState === 'roundover') cls += ' out';
+      if (!p.connected) cls += ' away';
+      chip.className = cls;
       chip.style.borderColor = p.color;
       chip.style.color = p.color;
-      chip.innerHTML = p.name + '<span class="score">(' + (p.score || 0) + ')</span>';
+
+      const label = document.createElement('span');
+      label.textContent = p.name + (p.connected ? '' : ' (away)');
+      const score = document.createElement('span');
+      score.className = 'score';
+      score.textContent = '(' + (p.score || 0) + ')';
+
+      const kick = document.createElement('button');
+      kick.type = 'button';
+      kick.className = 'kick-btn';
+      kick.textContent = 'Kick';
+      kick.title = 'Remove player';
+      kick.addEventListener('click', (e) => {
+        e.stopPropagation();
+        socket.emit('kickPlayer', p.token || p.id);
+      });
+
+      chip.appendChild(label);
+      chip.appendChild(score);
+      if (state.gameState === 'lobby' || state.gameState === 'roundover' || state.gameState === 'matchover') {
+        chip.appendChild(kick);
+      }
       playersEl.appendChild(chip);
     });
   }
 
-  startBtn.disabled = state.players.length < 1 || state.gameState === 'playing' || state.gameState === 'countdown';
+  const busy = state.gameState === 'playing' || state.gameState === 'countdown';
+  const matchDone = state.gameState === 'matchover';
+  startBtn.disabled = state.players.length < 1 || busy || matchDone;
+  newMatchBtn.style.display = matchDone ? 'inline-block' : 'none';
+  targetScoreInput.disabled = busy;
+  tempoModeSelect.disabled = busy;
 
   if (state.gameState === 'lobby') {
     countdownDisplay.style.display = 'none';
     winnerDisplay.style.display = 'none';
+    matchDisplay.style.display = 'none';
     musicPanel.style.display = 'none';
     playersEl.style.display = 'flex';
+  } else if (state.gameState === 'countdown') {
+    winnerDisplay.style.display = 'none';
+    matchDisplay.style.display = 'none';
+    musicPanel.style.display = 'none';
   } else if (state.gameState === 'playing') {
     countdownDisplay.style.display = 'none';
     winnerDisplay.style.display = 'none';
+    matchDisplay.style.display = 'none';
     musicPanel.style.display = 'block';
-    const pct = Math.min(100, ((state.tempo - 0.5) / 1.5) * 100);
-    tempoFill.style.width = pct + '%';
-    tempoLabel.textContent = state.tempo.toFixed(1) + 'x — ' +
-      (state.tempo < 1.0 ? '🧊 slow = strict' : state.tempo > 1.5 ? '🔥 fast = lenient' : 'moderate');
+    playersEl.style.display = 'flex';
+    setTempoUI(state.tempo, state.tempoMode);
+  } else if (state.gameState === 'roundover') {
+    countdownDisplay.style.display = 'none';
+    matchDisplay.style.display = 'none';
+    musicPanel.style.display = 'none';
+    playersEl.style.display = 'flex';
+    winnerDisplay.style.display = 'block';
+  } else if (state.gameState === 'matchover') {
+    countdownDisplay.style.display = 'none';
+    winnerDisplay.style.display = 'none';
+    musicPanel.style.display = 'none';
+    playersEl.style.display = 'flex';
+    matchDisplay.style.display = 'block';
+    if (state.matchWinner) {
+      matchName.textContent = state.matchWinner.name;
+      matchName.style.color = state.matchWinner.color;
+    }
   }
 }
 
@@ -281,6 +415,7 @@ socket.on('countdown', (n) => {
   countdownDisplay.style.display = 'block';
   countdownDisplay.textContent = n;
   winnerDisplay.style.display = 'none';
+  matchDisplay.style.display = 'none';
 });
 
 socket.on('go', () => {
@@ -299,10 +434,8 @@ socket.on('musicCommand', (cmd) => {
 socket.on('tempoUpdate', (data) => {
   currentTempo = data.tempo;
   updateMusicTempo(data.tempo);
-  const pct = Math.min(100, ((data.tempo - 0.5) / 1.5) * 100);
-  tempoFill.style.width = pct + '%';
-  tempoLabel.textContent = data.tempo.toFixed(1) + 'x — ' +
-    (data.tempo < 1.0 ? '🧊 slow = strict' : data.tempo > 1.5 ? '🔥 fast = lenient' : 'moderate');
+  const mode = lastState && lastState.tempoMode;
+  setTempoUI(data.tempo, mode);
 });
 
 socket.on('roundOver', (data) => {
@@ -312,8 +445,14 @@ socket.on('roundOver', (data) => {
   winnerName.style.color = data.winner ? data.winner.color : '#fff';
 });
 
-socket.on('playerOut', (data) => {
-  // Play elimination sound
+socket.on('matchOver', (data) => {
+  matchDisplay.style.display = 'block';
+  winnerDisplay.style.display = 'none';
+  matchName.textContent = data.winner ? data.winner.name + ' 👑' : 'No champion';
+  matchName.style.color = data.winner ? data.winner.color : '#fff';
+});
+
+socket.on('playerOut', () => {
   if (audioCtx) {
     const osc = audioCtx.createOscillator();
     const g = audioCtx.createGain();
@@ -329,12 +468,24 @@ socket.on('playerOut', (data) => {
   }
 });
 
-// ---- Controls ----
+socket.on('hostAway', () => {
+  /* only players receive this normally */
+});
+
+socket.on('disconnect', () => {
+  statusBanner.style.display = 'block';
+  statusBanner.textContent = 'Reconnecting… room will stay open briefly.';
+});
+
+socket.on('connect', () => {
+  // second connect handler already above via reclaim; hide banner when back
+  if (loadHostSession()) statusBanner.style.display = 'none';
+});
+
 startBtn.addEventListener('click', (e) => {
   e.preventDefault();
-  console.log('Start button clicked');
   winnerDisplay.style.display = 'none';
-  // Need user gesture to start AudioContext
+  matchDisplay.style.display = 'none';
   initAudio();
   if (audioCtx.state === 'suspended') audioCtx.resume();
   socket.emit('startRound', { tempoMode: tempoModeSelect.value });
@@ -342,9 +493,19 @@ startBtn.addEventListener('click', (e) => {
 
 resetBtn.addEventListener('click', (e) => {
   e.preventDefault();
-  console.log('Reset button clicked');
   stopMusic();
   socket.emit('resetLobby');
+});
+
+newMatchBtn.addEventListener('click', (e) => {
+  e.preventDefault();
+  stopMusic();
+  socket.emit('newMatch', { targetScore: parseInt(targetScoreInput.value, 10) || 3 });
+});
+
+targetScoreInput.addEventListener('change', () => {
+  const v = parseInt(targetScoreInput.value, 10);
+  if (v >= 1 && v <= 20) socket.emit('setTargetScore', v);
 });
 </script>
 </body>

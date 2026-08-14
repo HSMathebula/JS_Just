@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Juost</title>
+<style>
+  :root {
+    --bg: #0b0b12;
+    --fg: #f5f5f7;
+    --accent: #40c4ff;
+    --accent2: #ffd740;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -10%, #1a2a3a 0%, transparent 55%),
+      radial-gradient(circle at 80% 80%, #1a1520 0%, transparent 40%),
+      var(--bg);
+    color: var(--fg);
+    font-family: "Segoe UI", system-ui, sans-serif;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 32px 20px; text-align: center;
+  }
+  .logo {
+    font-size: clamp(3rem, 12vw, 6rem); font-weight: 900;
+    letter-spacing: -0.04em; margin: 0;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .tag {
+    font-size: clamp(1rem, 3.5vw, 1.35rem); opacity: 0.65; margin: 12px 0 40px;
+    max-width: 28rem; line-height: 1.4;
+  }
+  .roles {
+    display: flex; flex-wrap: wrap; gap: 16px; justify-content: center;
+    width: 100%; max-width: 520px;
+  }
+  a.role {
+    flex: 1 1 200px; text-decoration: none; color: var(--fg);
+    background: #14141e; border: 2px solid #2a2a38; border-radius: 20px;
+    padding: 28px 20px; transition: border-color 0.2s, transform 0.15s;
+  }
+  a.role:hover { border-color: var(--accent); transform: translateY(-2px); }
+  a.role.host:hover { border-color: var(--accent2); }
+  a.role .label { font-size: 1.5rem; font-weight: 800; display: block; margin-bottom: 8px; }
+  a.role .hint { font-size: 0.95rem; opacity: 0.55; line-height: 1.35; }
+  .howto {
+    margin-top: 48px; max-width: 28rem; font-size: 0.9rem; opacity: 0.45;
+    line-height: 1.5; text-align: left;
+  }
+  .howto strong { opacity: 0.85; color: var(--fg); }
+</style>
+</head>
+<body>
+  <h1 class="logo">JUOST</h1>
+  <p class="tag">Party game: hold still when the beat slows, move when it races. Last phone standing wins.</p>
+
+  <div class="roles">
+    <a class="role host" href="/host.html">
+      <span class="label">Host</span>
+      <span class="hint">TV or laptop — create the room and run the music</span>
+    </a>
+    <a class="role" href="/play">
+      <span class="label">Play</span>
+      <span class="hint">Phone — join with the room code and use motion (or tap)</span>
+    </a>
+  </div>
+
+  <div class="howto">
+    <strong>How to play</strong><br>
+    1. Host opens Host on the big screen and shares the 4-letter code.<br>
+    2. Everyone joins on phones from Play (same Wi‑Fi).<br>
+    3. First to the target score wins the match.<br>
+    4. On iOS, use HTTPS (see README) for motion — or use Tap to move.
+  </div>
+</body>
+</html>

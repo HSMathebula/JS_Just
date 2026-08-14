@@ -1,0 +1,96 @@
+:root {
+  --ink: #0c0a14;
+  --panel: #17131f;
+  --panel-line: #2a2436;
+  --parchment: #f2ead9;
+  --ember: #ff6a3d;
+  --gold: #e8b83c;
+  --crimson: #ff4d5e;
+  --muted: #8a8398;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body {
+  margin: 0; padding: 0; height: 100%;
+  background: var(--ink); color: var(--parchment);
+  font-family: 'Inter', sans-serif;
+  overflow: hidden; user-select: none;
+}
+#app {
+  height: 100%; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 24px; text-align: center;
+  transition: background-color 0.15s ease;
+}
+.logo {
+  font-family: 'Anton', sans-serif; font-weight: 400;
+  font-size: 15vw; letter-spacing: 0.02em; margin-bottom: 6px;
+  text-shadow: 3px 3px 0 var(--crimson);
+}
+.sub { color: var(--muted); font-size: 4.5vw; margin-bottom: 5vh; }
+
+.tilt-rail { display: block; width: 70vw; height: 10px; margin: 0 0 5vh; }
+
+input[type=text] {
+  font-family: 'Space Mono', monospace;
+  font-size: 6vw; padding: 14px 18px; border-radius: 10px;
+  border: 2px solid var(--panel-line); background: var(--panel); color: var(--parchment);
+  width: 80%; max-width: 320px; text-align: center; margin-bottom: 14px;
+  text-transform: uppercase;
+}
+input[type=text]:focus { outline: none; border-color: var(--ember); }
+input#nameInput { text-transform: none; }
+
+button {
+  font-family: 'Inter', sans-serif; font-size: 5.5vw; font-weight: 700; padding: 16px 42px;
+  border: none; background: var(--ember); color: var(--ink); cursor: pointer;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+  transition: transform 0.1s, opacity 0.2s;
+}
+button:active { transform: scale(0.95); }
+button:disabled { opacity: 0.3; cursor: default; }
+button.secondary {
+  background: var(--panel); color: var(--parchment); border: 1px solid var(--panel-line);
+  font-size: 4vw; padding: 12px 28px; margin-top: 16px; clip-path: none;
+}
+button.tap-out {
+  margin-top: 8vh; background: var(--crimson); color: var(--parchment); font-size: 5vw;
+  width: 80%; max-width: 320px;
+}
+
+.screen { display: none; height: 100%; width: 100%; flex-direction: column; align-items: center; justify-content: center; }
+.screen.active { display: flex; }
+
+#statusScreen .status-word {
+  font-family: 'Anton', sans-serif; font-weight: 400;
+  font-size: 18vw; letter-spacing: 0.01em; color: var(--parchment);
+}
+#statusScreen .status-sub { font-size: 5vw; color: var(--muted); margin-top: 8px; max-width: 90%; }
+#playerNameTag { font-family: 'Inter', sans-serif; font-size: 6vw; font-weight: 700; margin-top: 24px; color: var(--parchment); }
+#roomCodeDisplay { font-family: 'Space Mono', monospace; font-size: 4vw; color: var(--muted); margin-top: 8px; letter-spacing: 0.1em; }
+#roundInfo { font-family: 'Space Mono', monospace; font-size: 3.5vw; color: var(--muted); margin-top: 12px; opacity: 0.8; }
+
+#countdownScreen {
+  font-family: 'Anton', sans-serif; font-weight: 400; font-size: 40vw; color: var(--gold);
+  text-shadow: 5px 5px 0 var(--crimson);
+}
+
+.tempo-indicator {
+  position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+  font-family: 'Space Mono', monospace; font-size: 3.5vw; color: var(--ember); opacity: 0.75;
+}
+
+.error-msg { color: var(--crimson); font-size: 4vw; margin-top: 12px; min-height: 1.5em; max-width: 90%; font-family: 'Inter', sans-serif; }
+.hint-msg { color: var(--gold); font-size: 3.5vw; margin-top: 10px; opacity: 0.9; max-width: 90%; line-height: 1.3; font-family: 'Inter', sans-serif; }
+
+#reconnectBanner {
+  display: none; position: fixed; top: 0; left: 0; right: 0;
+  background: #2a1f14; color: var(--gold); padding: 10px; font-size: 3.5vw; z-index: 20;
+  font-family: 'Space Mono', monospace; text-align: center; border-bottom: 1px solid var(--gold);
+}
+
+.home-link { margin-top: 20px; font-size: 3.5vw; color: var(--muted); text-decoration: none; font-family: 'Inter', sans-serif; }
+.home-link:hover { color: var(--ember); }
+
+@media (prefers-reduced-motion: reduce) {
+  button { transition: none; }
+}

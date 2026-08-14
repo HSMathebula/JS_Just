@@ -1,0 +1,93 @@
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --ink: #0c0a14;
+  --panel: #17131f;
+  --panel-line: #2a2436;
+  --parchment: #f2ead9;
+  --ember: #ff6a3d;
+  --gold: #e8b83c;
+  --crimson: #ff4d5e;
+  --muted: #8a8398;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; padding: 0; }
+body {
+  min-height: 100vh;
+  background: radial-gradient(circle at 50% -10%, #201a2c 0%, var(--ink) 55%);
+  color: var(--parchment);
+  font-family: 'Inter', sans-serif;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 48px 20px 64px;
+  text-align: center;
+}
+
+.logo {
+  font-family: 'Anton', sans-serif; font-weight: 400;
+  font-size: clamp(3rem, 12vw, 6rem); letter-spacing: 0.02em;
+  margin: 0; line-height: 0.9;
+  text-shadow: 4px 4px 0 var(--crimson), 8px 8px 0 rgba(0,0,0,0.35);
+}
+
+.tag {
+  font-size: 1.05rem; color: var(--muted); max-width: 480px;
+  margin: 18px auto 0; line-height: 1.55;
+}
+
+/* tilt-rail: pure-CSS pennant strip, no extra markup needed */
+.roles {
+  position: relative;
+  display: flex; gap: 18px; flex-wrap: wrap; justify-content: center;
+  width: 100%; max-width: 720px;
+  margin-top: 44px;
+}
+.roles::before {
+  content: "";
+  position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
+  width: min(480px, 80vw); height: 12px;
+  background-image:
+    linear-gradient(135deg, var(--ember) 25%, transparent 25.5%),
+    linear-gradient(225deg, var(--ember) 25%, transparent 25.5%);
+  background-position: 0 0, 12px 0;
+  background-size: 24px 12px;
+  background-repeat: repeat-x;
+  opacity: 0.55;
+}
+
+.role {
+  flex: 1 1 260px; text-align: left; text-decoration: none; color: inherit;
+  background: var(--panel); border: 1px solid var(--panel-line);
+  padding: 26px 26px 24px 30px;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.role:hover, .role:focus-visible { transform: translateY(-3px); border-color: var(--ember); background: #1c1727; }
+.role:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+.role .label {
+  font-family: 'Anton', sans-serif; font-weight: 400; font-size: 1.9rem;
+  color: var(--ember);
+}
+.role.host .label { color: var(--gold); }
+
+.role .hint {
+  font-size: 0.9rem; color: var(--muted); line-height: 1.45;
+}
+
+.howto {
+  width: 100%; max-width: 560px; margin-top: 48px;
+  background: var(--panel); border: 1px solid var(--panel-line);
+  border-radius: 14px;
+  padding: 22px 26px;
+  text-align: left; font-size: 0.95rem; line-height: 1.9; color: var(--muted);
+}
+.howto strong {
+  display: block; margin-bottom: 8px;
+  font-family: 'Space Mono', monospace; text-transform: uppercase; letter-spacing: 0.14em;
+  font-size: 0.8rem; color: var(--ember);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .role { transition: none; }
+}

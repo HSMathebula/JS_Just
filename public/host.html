@@ -200,6 +200,7 @@ function clearHostSession() {
 }
 
 socket.on('connect', () => {
+  statusBanner.style.display = 'none';
   const session = loadHostSession();
   if (session && session.hostToken && session.code) {
     socket.emit('reclaimHost', { hostToken: session.hostToken, code: session.code });
@@ -328,7 +329,7 @@ function render(state) {
 
   playersEl.innerHTML = '';
   if (state.players.length === 0) {
-    playersEl.innerHTML = '<span class="empty-hint">Waiting for players to join…</span>';
+    playersEl.innerHTML = '<span class="empty-hint">Waiting for players… need at least 2 to start</span>';
   } else {
     state.players.forEach(p => {
       const chip = document.createElement('div');
@@ -365,9 +366,10 @@ function render(state) {
     });
   }
 
+  const connectedCount = state.players.filter(p => p.connected !== false).length;
   const busy = state.gameState === 'playing' || state.gameState === 'countdown';
   const matchDone = state.gameState === 'matchover';
-  startBtn.disabled = state.players.length < 1 || busy || matchDone;
+  startBtn.disabled = connectedCount < 2 || busy || matchDone;
   newMatchBtn.style.display = matchDone ? 'inline-block' : 'none';
   targetScoreInput.disabled = busy;
   tempoModeSelect.disabled = busy;
@@ -475,11 +477,6 @@ socket.on('hostAway', () => {
 socket.on('disconnect', () => {
   statusBanner.style.display = 'block';
   statusBanner.textContent = 'Reconnecting… room will stay open briefly.';
-});
-
-socket.on('connect', () => {
-  // second connect handler already above via reclaim; hide banner when back
-  if (loadHostSession()) statusBanner.style.display = 'none';
 });
 
 startBtn.addEventListener('click', (e) => {

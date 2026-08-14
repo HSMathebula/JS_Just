@@ -33,10 +33,11 @@ const io = new Server(server, {
   pingTimeout: 5000
 });
 
+app.use(express.static(__dirname));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.get('/play', (req, res) => {
@@ -171,17 +172,15 @@ function checkForWinner(room) {
   const present = Object.values(room.playersByToken);
   const alive = present.filter(p => p.alive);
 
-  // Solo: round ends when the only player is eliminated
-  if (present.length === 1) {
-    if (alive.length === 0) {
-      endRound(room, null);
-    }
+  // Nobody left alive
+  if (alive.length === 0) {
+    endRound(room, null);
     return;
   }
 
-  // 2+: last one standing (or everyone out)
-  if (alive.length <= 1) {
-    endRound(room, alive[0] || null);
+  // Last player alive wins (others out or left the room)
+  if (alive.length === 1) {
+    endRound(room, alive[0]);
   }
 }
 
@@ -196,10 +195,12 @@ function endRound(room, winner) {
     winner.score = (winner.score || 0) + 1;
   }
 
+  const winnerPayload = winner
+    ? { id: winner.id, token: winner.token, name: winner.name, color: winner.color, score: winner.score }
+    : null;
+
   io.to(room.code).emit('roundOver', {
-    winner: winner
-      ? { id: winner.id, name: winner.name, color: winner.color, score: winner.score }
-      : null,
+    winner: winnerPayload,
     roundNumber: room.roundNumber,
     targetScore: room.targetScore
   });
@@ -209,7 +210,7 @@ function endRound(room, winner) {
     room.gameState = 'matchover';
     room.matchWinner = winner;
     io.to(room.code).emit('matchOver', {
-      winner: { id: winner.id, name: winner.name, color: winner.color, score: winner.score },
+      winner: winnerPayload,
       targetScore: room.targetScore
     });
   }
@@ -400,15 +401,16 @@ io.on('connection', (socket) => {
     if (room.gameState === 'matchover') return;
 
     const players = Object.values(room.playersByToken);
-    if (players.length < 1) return;
+    const ready = players.filter(p => p.connected);
+    // Elimination needs at least 2 connected players so a round can finish
+    if (ready.length < 2) return;
 
-    // Multiplayer elimination needs 2+; solo is allowed as a survival (die = lose)
     room.tempoMode = ['accelerating', 'random', 'steady'].includes(tempoMode)
       ? tempoMode
       : 'accelerating';
     room.musicTrack = room.tempoMode === 'steady' ? 'none' : 'default';
 
-    players.forEach(p => { p.alive = true; });
+    players.forEach(p => { p.alive = !!p.connected; });
     room.roundNumber++;
     room.sensitivity = room.tempoMode === 'steady' ? 1.0 : 0.5;
     room.tempo = 1.0;
@@ -472,7 +474,7 @@ io.on('connection', (socket) => {
     const p = room.players[socket.id];
     if (!p || !p.alive || room.gameState !== 'playing') return;
     p.alive = false;
-    io.to(room.code).emit('playerOut', { id: p.id, name: p.name, color: p.color });
+    io.to(room.code).emit('playerOut', { id: p.id, token: p.token, name: p.name, color: p.color });
     broadcastRoomState(room);
     checkForWinner(room);
   });

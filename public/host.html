@@ -8,47 +8,89 @@
   :root { --bg: #0b0b12; --fg: #f5f5f7; --accent: #40c4ff; }
   * { box-sizing: border-box; }
   body {
-    margin: 0; min-height: 100vh; background: radial-gradient(circle at 50% 0%, #16161f, #0b0b12 70%);
-    color: var(--fg); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    display: flex; flex-direction: column; align-items: center; padding: 40px 24px;
+    margin: 0; min-height: 100vh;
+    background: radial-gradient(circle at 50% 0%, #16161f, #0b0b12 70%);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 40px 24px;
   }
-  h1.logo { font-size: 6vw; font-weight: 900; letter-spacing: -0.03em; margin: 0; }
-  .join-url { font-size: 1.6vw; opacity: 0.6; margin-top: 6px; margin-bottom: 40px; letter-spacing: 0.02em; }
+  h1.logo { font-size: 5vw; font-weight: 900; letter-spacing: -0.03em; margin: 0; }
+  .room-code {
+    font-size: 4vw; font-weight: 900; font-family: monospace;
+    background: #1a1a24; border: 3px solid var(--accent); border-radius: 16px;
+    padding: 12px 32px; margin-top: 16px; letter-spacing: 0.3em;
+  }
+  .join-url { font-size: 1.4vw; opacity: 0.5; margin-top: 10px; margin-bottom: 30px; }
 
   #players {
-    display: flex; flex-wrap: wrap; gap: 18px; justify-content: center;
-    max-width: 1100px; margin-bottom: 50px;
+    display: flex; flex-wrap: wrap; gap: 16px; justify-content: center;
+    max-width: 1100px; margin-bottom: 40px;
   }
   .player-chip {
-    padding: 16px 26px; border-radius: 16px; font-size: 2vw; font-weight: 700;
-    background: #1a1a24; border: 3px solid transparent; transition: all 0.2s ease;
+    padding: 14px 24px; border-radius: 14px; font-size: 1.8vw; font-weight: 700;
+    background: #1a1a24; border: 3px solid transparent; transition: all 0.25s ease;
+    position: relative;
   }
-  .player-chip.out { opacity: 0.25; text-decoration: line-through; transform: scale(0.9); }
+  .player-chip .score { font-size: 1.2vw; opacity: 0.6; margin-left: 8px; }
+  .player-chip.out { opacity: 0.25; text-decoration: line-through; transform: scale(0.92); }
+  .player-chip.out::after {
+    content: '☠'; position: absolute; top: -8px; right: -8px; font-size: 1.4vw;
+  }
 
-  #controls { display: flex; gap: 20px; margin-top: 10px; }
+  #controls { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
   button {
-    font-size: 1.8vw; font-weight: 700; padding: 18px 44px;
+    font-size: 1.5vw; font-weight: 700; padding: 16px 36px;
     border-radius: 999px; border: none; background: var(--accent); color: #05060a; cursor: pointer;
+    transition: transform 0.1s, opacity 0.2s;
   }
+  button:active { transform: scale(0.97); }
   button.secondary { background: #2a2a36; color: var(--fg); }
-  button:disabled { opacity: 0.35; cursor: default; }
+  button:disabled { opacity: 0.3; cursor: default; }
+
+  select {
+    font-size: 1.4vw; padding: 12px 20px; border-radius: 12px;
+    border: 2px solid #333; background: #1a1a24; color: var(--fg); cursor: pointer;
+  }
 
   #countdownDisplay {
-    font-size: 22vw; font-weight: 900; display: none;
+    font-size: 20vw; font-weight: 900; display: none;
   }
-
   #winnerDisplay { display: none; text-align: center; }
   #winnerDisplay .label { font-size: 2vw; opacity: 0.6; }
-  #winnerDisplay .name { font-size: 8vw; font-weight: 900; }
+  #winnerDisplay .name { font-size: 7vw; font-weight: 900; }
 
-  .empty-hint { opacity: 0.4; font-size: 1.6vw; }
-  #sensBar { width: 60vw; height: 10px; background: #222; border-radius: 6px; overflow: hidden; margin-top: 30px; display:none;}
-  #sensFill { height: 100%; background: linear-gradient(90deg, #40c4ff, #ff5252); width: 20%; transition: width 0.3s ease; }
+  .empty-hint { opacity: 0.4; font-size: 1.5vw; }
+
+  /* Tempo / music bar */
+  #musicPanel {
+    width: 60vw; margin-top: 24px; display: none;
+  }
+  #musicPanel .bar-label { font-size: 1.2vw; opacity: 0.6; margin-bottom: 6px; }
+  #tempoBar {
+    width: 100%; height: 14px; background: #1a1a24; border-radius: 8px; overflow: hidden;
+    border: 1px solid #333;
+  }
+  #tempoFill {
+    height: 100%; width: 20%; border-radius: 8px;
+    background: linear-gradient(90deg, #40c4ff, #ffd740, #ff5252);
+    transition: width 0.4s ease;
+  }
+  #tempoLabel { font-size: 1.3vw; font-family: monospace; margin-top: 6px; opacity: 0.7; }
+
+  /* Audio visualizer */
+  #visualizer {
+    width: 60vw; height: 60px; margin-top: 16px; display: none;
+  }
+  #visualizer canvas { width: 100%; height: 100%; border-radius: 8px; }
+
+  .scoreboard { margin-top: 16px; font-size: 1.2vw; opacity: 0.6; }
 </style>
 </head>
 <body>
   <h1 class="logo">JUOST</h1>
-  <div class="join-url" id="joinUrl">Players: open this server's address on their phones to join</div>
+  <div class="room-code" id="roomCode">----</div>
+  <div class="join-url" id="joinUrl">Loading...</div>
 
   <div id="players"><span class="empty-hint">Waiting for players to join…</span></div>
 
@@ -59,33 +101,147 @@
     <div class="name" id="winnerName"></div>
   </div>
 
-  <div id="sensBar"><div id="sensFill"></div></div>
-
-  <div id="controls">
-    <button id="startBtn" disabled>Start Round</button>
-    <button id="resetBtn" class="secondary">Reset Lobby</button>
+  <div id="musicPanel">
+    <div class="bar-label">♩ Music Tempo — controls movement sensitivity</div>
+    <div id="tempoBar"><div id="tempoFill"></div></div>
+    <div id="tempoLabel">1.0x — slow = strict, fast = lenient</div>
   </div>
 
+  <div id="visualizer"><canvas id="vizCanvas"></canvas></div>
+
+  <div id="controls">
+    <select id="tempoMode">
+      <option value="accelerating">🎵 Accelerating</option>
+      <option value="random">🎲 Random Shifts</option>
+      <option value="steady">⏱ Steady (no music)</option>
+    </select>
+    <button id="startBtn" type="button" disabled>Start Round</button>
+    <button id="resetBtn" type="button" class="secondary">Back to Lobby</button>
+  </div>
+
+<!-- Embedded audio tracks (generated via Web Audio API) -->
 <script src="/socket.io/socket.io.js"></script>
 <script>
-const socket = io();
-socket.emit('hostJoin');
+const socket = io({ reconnection: true });
 
-document.getElementById('joinUrl').textContent = 'Players join at: ' + location.origin;
+// ---- Create room once connected ----
+socket.on('connect', () => {
+  console.log('Host connected, creating room...');
+  socket.emit('createRoom');
+});
 
+socket.on('roomCreated', (data) => {
+  console.log('Room created:', data.code);
+  document.getElementById('roomCode').textContent = data.code;
+  document.getElementById('joinUrl').textContent =
+    'Players join at: ' + location.origin + ' → code: ' + data.code;
+});
+
+// ---- DOM refs ----
 const playersEl = document.getElementById('players');
 const startBtn = document.getElementById('startBtn');
 const resetBtn = document.getElementById('resetBtn');
+const tempoModeSelect = document.getElementById('tempoMode');
 const countdownDisplay = document.getElementById('countdownDisplay');
 const winnerDisplay = document.getElementById('winnerDisplay');
 const winnerName = document.getElementById('winnerName');
-const sensBar = document.getElementById('sensBar');
-const sensFill = document.getElementById('sensFill');
+const musicPanel = document.getElementById('musicPanel');
+const tempoFill = document.getElementById('tempoFill');
+const tempoLabel = document.getElementById('tempoLabel');
+const visualizer = document.getElementById('visualizer');
+const vizCanvas = document.getElementById('vizCanvas');
 
-let currentState = null;
+// ---- Web Audio for music-driven gameplay ----
+let audioCtx = null;
+let musicOsc = null;
+let musicGain = null;
+let lfo = null;
+let analyser = null;
+let animFrame = null;
+let currentTempo = 1.0;
 
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  analyser = audioCtx.createAnalyser();
+  analyser.fftSize = 128;
+  analyser.connect(audioCtx.destination);
+}
+
+function startMusic(tempoMode) {
+  initAudio();
+  stopMusic();
+
+  // Create a rhythmic synth tone that changes with tempo
+  musicGain = audioCtx.createGain();
+  musicGain.gain.value = 0.15;
+  musicGain.connect(analyser);
+
+  musicOsc = audioCtx.createOscillator();
+  musicOsc.type = 'triangle';
+  musicOsc.frequency.value = 220;
+  musicOsc.connect(musicGain);
+  musicOsc.start();
+
+  // LFO for rhythmic pulsing — rate = tempo
+  lfo = audioCtx.createOscillator();
+  lfo.type = 'square';
+  lfo.frequency.value = currentTempo * 2; // beats per second
+  const lfoGain = audioCtx.createGain();
+  lfoGain.gain.value = 0.12;
+  lfo.connect(lfoGain);
+  lfoGain.connect(musicGain.gain);
+  lfo.start();
+
+  visualizer.style.display = 'block';
+  drawVisualizer();
+}
+
+function updateMusicTempo(tempo) {
+  currentTempo = tempo;
+  if (lfo) {
+    lfo.frequency.value = tempo * 2.5;
+  }
+  if (musicOsc) {
+    // Pitch rises with tempo for urgency
+    musicOsc.frequency.value = 180 + tempo * 80;
+  }
+}
+
+function stopMusic() {
+  if (musicOsc) { try { musicOsc.stop(); } catch(e){} musicOsc = null; }
+  if (lfo) { try { lfo.stop(); } catch(e){} lfo = null; }
+  musicGain = null;
+  if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+  visualizer.style.display = 'none';
+}
+
+function drawVisualizer() {
+  if (!analyser) return;
+  const ctx = vizCanvas.getContext('2d');
+  const width = vizCanvas.width = vizCanvas.clientWidth * 2;
+  const height = vizCanvas.height = vizCanvas.clientHeight * 2;
+  const bufLen = analyser.frequencyBinCount;
+  const data = new Uint8Array(bufLen);
+
+  function draw() {
+    animFrame = requestAnimationFrame(draw);
+    analyser.getByteFrequencyData(data);
+    ctx.fillStyle = '#0b0b12';
+    ctx.fillRect(0, 0, width, height);
+    const barW = width / bufLen;
+    for (let i = 0; i < bufLen; i++) {
+      const h = (data[i] / 255) * height;
+      const hue = 200 - (currentTempo - 0.5) * 60 + i * 2;
+      ctx.fillStyle = `hsl(${hue}, 80%, 60%)`;
+      ctx.fillRect(i * barW, height - h, barW - 1, h);
+    }
+  }
+  draw();
+}
+
+// ---- Game state rendering ----
 function render(state) {
-  currentState = state;
   playersEl.innerHTML = '';
   if (state.players.length === 0) {
     playersEl.innerHTML = '<span class="empty-hint">Waiting for players to join…</span>';
@@ -95,23 +251,26 @@ function render(state) {
       chip.className = 'player-chip' + (p.alive ? '' : ' out');
       chip.style.borderColor = p.color;
       chip.style.color = p.color;
-      chip.textContent = p.name + (p.alive ? '' : ' ☠');
+      chip.innerHTML = p.name + '<span class="score">(' + (p.score || 0) + ')</span>';
       playersEl.appendChild(chip);
     });
   }
+
   startBtn.disabled = state.players.length < 1 || state.gameState === 'playing' || state.gameState === 'countdown';
 
   if (state.gameState === 'lobby') {
     countdownDisplay.style.display = 'none';
     winnerDisplay.style.display = 'none';
-    sensBar.style.display = 'none';
+    musicPanel.style.display = 'none';
     playersEl.style.display = 'flex';
   } else if (state.gameState === 'playing') {
     countdownDisplay.style.display = 'none';
     winnerDisplay.style.display = 'none';
-    sensBar.style.display = 'block';
-    const pct = Math.min(100, ((state.sensitivity - 0.6) / (2.2 - 0.6)) * 100);
-    sensFill.style.width = pct + '%';
+    musicPanel.style.display = 'block';
+    const pct = Math.min(100, ((state.tempo - 0.5) / 1.5) * 100);
+    tempoFill.style.width = pct + '%';
+    tempoLabel.textContent = state.tempo.toFixed(1) + 'x — ' +
+      (state.tempo < 1.0 ? '🧊 slow = strict' : state.tempo > 1.5 ? '🔥 fast = lenient' : 'moderate');
   }
 }
 
@@ -121,6 +280,7 @@ socket.on('countdown', (n) => {
   playersEl.style.display = 'none';
   countdownDisplay.style.display = 'block';
   countdownDisplay.textContent = n;
+  winnerDisplay.style.display = 'none';
 });
 
 socket.on('go', () => {
@@ -128,19 +288,62 @@ socket.on('go', () => {
   playersEl.style.display = 'flex';
 });
 
+socket.on('musicCommand', (cmd) => {
+  if (cmd.action === 'play') {
+    startMusic(cmd.tempoMode);
+  } else if (cmd.action === 'stop') {
+    stopMusic();
+  }
+});
+
+socket.on('tempoUpdate', (data) => {
+  currentTempo = data.tempo;
+  updateMusicTempo(data.tempo);
+  const pct = Math.min(100, ((data.tempo - 0.5) / 1.5) * 100);
+  tempoFill.style.width = pct + '%';
+  tempoLabel.textContent = data.tempo.toFixed(1) + 'x — ' +
+    (data.tempo < 1.0 ? '🧊 slow = strict' : data.tempo > 1.5 ? '🔥 fast = lenient' : 'moderate');
+});
+
 socket.on('roundOver', (data) => {
   winnerDisplay.style.display = 'block';
-  sensBar.style.display = 'none';
-  winnerName.textContent = data.winner ? data.winner.name : 'No one (empty lobby)';
+  musicPanel.style.display = 'none';
+  winnerName.textContent = data.winner ? data.winner.name + ' 🏆' : 'No winner';
   winnerName.style.color = data.winner ? data.winner.color : '#fff';
 });
 
-startBtn.addEventListener('click', () => {
-  winnerDisplay.style.display = 'none';
-  socket.emit('startRound');
+socket.on('playerOut', (data) => {
+  // Play elimination sound
+  if (audioCtx) {
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.value = 150;
+    g.gain.value = 0.2;
+    osc.connect(g);
+    g.connect(audioCtx.destination);
+    osc.start();
+    osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.3);
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+    osc.stop(audioCtx.currentTime + 0.4);
+  }
 });
 
-resetBtn.addEventListener('click', () => {
+// ---- Controls ----
+startBtn.addEventListener('click', (e) => {
+  e.preventDefault();
+  console.log('Start button clicked');
+  winnerDisplay.style.display = 'none';
+  // Need user gesture to start AudioContext
+  initAudio();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  socket.emit('startRound', { tempoMode: tempoModeSelect.value });
+});
+
+resetBtn.addEventListener('click', (e) => {
+  e.preventDefault();
+  console.log('Reset button clicked');
+  stopMusic();
   socket.emit('resetLobby');
 });
 </script>

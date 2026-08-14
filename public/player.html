@@ -120,10 +120,12 @@
 
 </div>
 
-<script src="/socket.io/socket.io.js"></script>
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="juost-p2p.js"></script>
 <script>
 const SESSION_KEY = 'juost_player';
-const socket = io({ reconnection: true, reconnectionAttempts: 20 });
+const socket = JuostNet.connect({ role: 'player' });
 
 const app = document.getElementById('app');
 const screens = document.querySelectorAll('.screen');
@@ -282,6 +284,11 @@ socket.on('connect', () => {
   }
 });
 
+socket.on('connect_error', (err) => {
+  connected = false;
+  errorMsg.textContent = (err && err.message) || 'Could not connect. Reload and try again.';
+});
+
 socket.on('disconnect', () => {
   connected = false;
   if (inRoom) reconnectBanner.style.display = 'block';
@@ -302,7 +309,7 @@ joinBtn.addEventListener('click', (e) => {
   errorMsg.textContent = '';
 
   if (!connected) {
-    errorMsg.textContent = 'Not connected to server. Make sure it is running.';
+    errorMsg.textContent = 'Not connected yet. Wait a moment and try again — and keep the host tab open.';
     return;
   }
   if (code.length !== 4) {

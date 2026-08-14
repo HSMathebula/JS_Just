@@ -28,6 +28,7 @@ jobs:
           mkdir -p _site/public
           cp index.html .nojekyll _site/
           cp public/*.html _site/public/
+          cp public/*.js _site/public/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

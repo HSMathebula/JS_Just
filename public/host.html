@@ -110,7 +110,7 @@
     <div class="round-badge" id="roundBadge">Round 0</div>
     <div class="score-badge" id="scoreBadge">First to 3</div>
   </div>
-  <div class="join-url" id="joinUrl">Loading...</div>
+  <div class="join-url" id="joinUrl">Creating room…</div>
   <div id="statusBanner"></div>
 
   <div id="players"><span class="empty-hint">Waiting for players to join…</span></div>
@@ -150,10 +150,12 @@
     <button id="resetBtn" type="button" class="secondary">Back to Lobby</button>
   </div>
 
-<script src="/socket.io/socket.io.js"></script>
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="juost-p2p.js"></script>
 <script>
 const HOST_KEY = 'juost_host';
-const socket = io({ reconnection: true });
+const socket = JuostNet.connect({ role: 'host' });
 
 const playersEl = document.getElementById('players');
 const startBtn = document.getElementById('startBtn');
@@ -216,16 +218,27 @@ socket.on('reclaimFailed', () => {
 
 socket.on('roomCreated', (data) => {
   document.getElementById('roomCode').textContent = data.code;
-  const playerPage = new URL('player.html', location.href).href;
+  const playerPage = new URL('player.html', location.href);
+  playerPage.searchParams.set('code', data.code);
+  const keepOpen = data.p2p
+    ? '<br><span style="opacity:0.8">Keep this tab open — the room is hosted here</span>'
+    : '';
   document.getElementById('joinUrl').innerHTML =
-    'Players join at <strong>' + playerPage + '</strong> with code <strong>' + data.code + '</strong><br>' +
-    '<span style="opacity:0.8">Same Wi‑Fi · iOS motion needs HTTPS (or use Tap to move)</span>';
+    'Players join at <strong>' + playerPage.href + '</strong><br>' +
+    '<span style="opacity:0.8">Same Wi‑Fi · iOS motion needs HTTPS (or use Tap to move)</span>' +
+    keepOpen;
   saveHostSession({ code: data.code, hostToken: data.hostToken });
   if (data.targetScore) {
     targetScoreInput.value = data.targetScore;
     scoreBadge.textContent = 'First to ' + data.targetScore;
   }
   statusBanner.style.display = 'none';
+});
+
+socket.on('connect_error', (err) => {
+  statusBanner.style.display = 'block';
+  statusBanner.textContent = (err && err.message) || 'Could not create a room. Reload and try again.';
+  document.getElementById('joinUrl').textContent = 'Room unavailable';
 });
 
 function initAudio() {

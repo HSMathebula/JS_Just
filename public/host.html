@@ -216,9 +216,9 @@ socket.on('reclaimFailed', () => {
 
 socket.on('roomCreated', (data) => {
   document.getElementById('roomCode').textContent = data.code;
-  const origin = location.origin;
+  const playerPage = new URL('player.html', location.href).href;
   document.getElementById('joinUrl').innerHTML =
-    'Players join at <strong>' + origin + '/play</strong> with code <strong>' + data.code + '</strong><br>' +
+    'Players join at <strong>' + playerPage + '</strong> with code <strong>' + data.code + '</strong><br>' +
     '<span style="opacity:0.8">Same Wi‑Fi · iOS motion needs HTTPS (or use Tap to move)</span>';
   saveHostSession({ code: data.code, hostToken: data.hostToken });
   if (data.targetScore) {
